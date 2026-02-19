@@ -3,10 +3,9 @@ import os
 import logging
 from sklearn.model_selection import train_test_split
 
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 #making logs directory
-log_dir = os.path.join(ROOT_DIR, "logs")
+log_dir = "logs"
 os.makedirs(log_dir,exist_ok=True)
 
 
@@ -82,6 +81,7 @@ def preprocess_df(df:pd.DataFrame) -> pd.DataFrame:
 #saving data function
 def save_data(df: pd.DataFrame, train_df: pd.DataFrame, test_df: pd.DataFrame):
     try:
+        #create directories if not exist
         raw_data_path = os.path.join("data", "raw")
         processed_data_path = os.path.join("data", "processed")
         os.makedirs(raw_data_path, exist_ok=True)
