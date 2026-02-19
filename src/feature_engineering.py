@@ -34,7 +34,7 @@ logger.addHandler(file_handler)
 
 def load_data(file_path:str) -> pd.DataFrame:
     try:
-        df = pd.read_csv(file_path,encoding='latin-1')
+        df = pd.read_csv(file_path, encoding='utf-8')
         df.fillna('',inplace=True)
         logger.debug(f"Data loaded successfully with shape {df.shape}")
         return df
