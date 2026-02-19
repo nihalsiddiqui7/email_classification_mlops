@@ -210,6 +210,3 @@ __marimo__/
 #adding tmpclaud files
 tmpclaud/
 
-dvc.lock
-dvc.yaml
-logs/

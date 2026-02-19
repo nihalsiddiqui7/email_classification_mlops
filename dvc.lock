@@ -1,0 +1,150 @@
+schema: '2.0'
+stages:
+  ingest:
+    cmd: python src/data_ingestion.py
+    deps:
+    - path: spam.csv
+      hash: md5
+      md5: 008dcf9ca6aab621d3b3831db6815867
+      size: 503663
+    - path: src/data_ingestion.py
+      hash: md5
+      md5: 94b162d2e127543332679d117a8538b5
+      size: 4415
+    outs:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: dcc517f001936f3c8026294e5c67bd9e
+      size: 96182
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 11f59e8a7a4efb391c6172298e811421
+      size: 376777
+    - path: data/raw/raw.csv
+      hash: md5
+      md5: f52c5c03ecaea40862d0eea311dc381b
+      size: 504895
+  preprocess:
+    cmd: python src/data_preprocessing.py
+    deps:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: dcc517f001936f3c8026294e5c67bd9e
+      size: 96182
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 11f59e8a7a4efb391c6172298e811421
+      size: 376777
+    - path: src/data_preprocessing.py
+      hash: md5
+      md5: 1d1a1620ffb273628ab5a66f67422de4
+      size: 3558
+    outs:
+    - path: data/processed/test_processed.csv
+      hash: md5
+      md5: ff833b0c96be73387f51c1b83bc06288
+      size: 56152
+    - path: data/processed/train_processed.csv
+      hash: md5
+      md5: 0db202a180277da701bfa9d7d524b348
+      size: 206827
+  featurize:
+    cmd: python src/feature_engineering.py
+    deps:
+    - path: data/processed/test_processed.csv
+      hash: md5
+      md5: ff833b0c96be73387f51c1b83bc06288
+      size: 56152
+    - path: data/processed/train_processed.csv
+      hash: md5
+      md5: 0db202a180277da701bfa9d7d524b348
+      size: 206827
+    - path: src/feature_engineering.py
+      hash: md5
+      md5: 02f9ce7e52243b1a541fb104df028e43
+      size: 3356
+    outs:
+    - path: data/processed/test_tfidf.csv
+      hash: md5
+      md5: a85a414bb75c82fc75b559c41b7449ef
+      size: 27281160
+    - path: data/processed/train_tfidf.csv
+      hash: md5
+      md5: 6a17ae0f4d7ae4c665f00a2f5d6a304c
+      size: 103709664
+  train_rf:
+    cmd: python src/model.py --model_type random_forest --output_dir .
+    deps:
+    - path: data/processed/train_tfidf.csv
+      hash: md5
+      md5: 6a17ae0f4d7ae4c665f00a2f5d6a304c
+      size: 103709664
+    - path: src/model.py
+      hash: md5
+      md5: 99f5c521391813c8bb85037624f0d283
+      size: 3804
+    outs:
+    - path: models/random_forest.pkl
+      hash: md5
+      md5: 42168ff0eba182224dd2afab7efdc3e2
+      size: 766463
+  eval_rf:
+    cmd: python src/model_eval.py --model_path ./models/random_forest.pkl 
+      --test_data_path ./data/processed/test_tfidf.csv --metrics_path 
+      ./logs/metrics_rf.json
+    deps:
+    - path: data/processed/test_tfidf.csv
+      hash: md5
+      md5: a85a414bb75c82fc75b559c41b7449ef
+      size: 27281160
+    - path: models/random_forest.pkl
+      hash: md5
+      md5: 42168ff0eba182224dd2afab7efdc3e2
+      size: 766463
+    - path: src/model_eval.py
+      hash: md5
+      md5: b59091599c551a44749d8683f6b85eb1
+      size: 3455
+    outs:
+    - path: logs/metrics_rf.json
+      hash: md5
+      md5: 47937d3a4f8b8351d563e148f2384a66
+      size: 657
+  train_xgb:
+    cmd: python src/model.py --model_type xgboost --output_dir .
+    deps:
+    - path: data/processed/train_tfidf.csv
+      hash: md5
+      md5: 6a17ae0f4d7ae4c665f00a2f5d6a304c
+      size: 103709664
+    - path: src/model.py
+      hash: md5
+      md5: 99f5c521391813c8bb85037624f0d283
+      size: 3804
+    outs:
+    - path: models/xgboost.pkl
+      hash: md5
+      md5: f5ee8338ce62b35b1843f2660309067a
+      size: 451822
+  eval_xgb:
+    cmd: python src/model_eval.py --model_path ./models/xgboost.pkl 
+      --test_data_path ./data/processed/test_tfidf.csv --metrics_path 
+      ./logs/metrics_xgboost.json
+    deps:
+    - path: data/processed/test_tfidf.csv
+      hash: md5
+      md5: a85a414bb75c82fc75b559c41b7449ef
+      size: 27281160
+    - path: models/xgboost.pkl
+      hash: md5
+      md5: f5ee8338ce62b35b1843f2660309067a
+      size: 451822
+    - path: src/model_eval.py
+      hash: md5
+      md5: b59091599c551a44749d8683f6b85eb1
+      size: 3455
+    outs:
+    - path: logs/metrics_xgboost.json
+      hash: md5
+      md5: 3b5b40a65a17333785e1228254b17b21
+      size: 655

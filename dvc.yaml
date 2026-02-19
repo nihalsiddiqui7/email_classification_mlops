@@ -1,0 +1,64 @@
+stages:
+  ingest:
+    cmd: python src/data_ingestion.py
+    deps:
+      - spam.csv
+      - src/data_ingestion.py
+    outs:
+      - data/raw/raw.csv
+      - data/processed/train.csv
+      - data/processed/test.csv
+
+  preprocess:
+    cmd: python src/data_preprocessing.py
+    deps:
+      - src/data_preprocessing.py
+      - data/processed/train.csv
+      - data/processed/test.csv
+    outs:
+      - data/processed/train_processed.csv
+      - data/processed/test_processed.csv
+
+  featurize:
+    cmd: python src/feature_engineering.py
+    deps:
+      - src/feature_engineering.py
+      - data/processed/train_processed.csv
+      - data/processed/test_processed.csv
+    outs:
+      - data/processed/train_tfidf.csv
+      - data/processed/test_tfidf.csv
+
+  train_rf:
+    cmd: python src/model.py --model_type random_forest --output_dir .
+    deps:
+      - src/model.py
+      - data/processed/train_tfidf.csv
+    outs:
+      - models/random_forest.pkl
+
+  eval_rf:
+    cmd: python src/model_eval.py --model_path ./models/random_forest.pkl --test_data_path ./data/processed/test_tfidf.csv --metrics_path ./logs/metrics_rf.json
+    deps:
+      - src/model_eval.py
+      - models/random_forest.pkl
+      - data/processed/test_tfidf.csv
+    metrics:
+      - logs/metrics_rf.json
+
+  train_xgb:
+    cmd: python src/model.py --model_type xgboost --output_dir .
+    deps:
+      - src/model.py
+      - data/processed/train_tfidf.csv
+    outs:
+      - models/xgboost.pkl
+
+  eval_xgb:
+    cmd: python src/model_eval.py --model_path ./models/xgboost.pkl --test_data_path ./data/processed/test_tfidf.csv --metrics_path ./logs/metrics_xgboost.json
+    deps:
+      - src/model_eval.py
+      - models/xgboost.pkl
+      - data/processed/test_tfidf.csv
+    metrics:
+      - logs/metrics_xgboost.json
