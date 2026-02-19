@@ -3,9 +3,10 @@ import os
 import logging
 from sklearn.model_selection import train_test_split
 
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 #making logs directory
-log_dir = "logs"
+log_dir = os.path.join(ROOT_DIR, "logs")
 os.makedirs(log_dir,exist_ok=True)
 
 
